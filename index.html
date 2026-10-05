@@ -1,515 +1,813 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>역할극 대본 생성기 - 전학년 교과서 통합판</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Do Hyeon, Nanum Pen Script -->
-    <link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Do Hyeon', sans-serif;
-            background-color: #fdfbf7; /* 따뜻한 느낌의 미색 배경 */
-        }
-        .step-card {
-            display: none;
-        }
-        .step-card.active {
-            display: block;
-            animation: fadeIn 0.4s ease-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .loader {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #3b82f6;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        /* 대본 출력 영역 스타일: 따뜻하고 가독성 좋은 나눔펜글씨 적용 */
-        #scriptOutput {
-            white-space: pre-wrap;
-            line-height: 1.6;
-            font-family: 'Nanum Pen Script', cursive;
-            min-height: 400px;
-            outline: none;
-            padding: 3rem;
-            font-size: 1.6rem;
-            color: #2d3748;
-            background-color: #ffffff;
-            border-radius: 2rem;
-            box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
-        }
-        #scriptOutput:focus {
-            box-shadow: inset 0 0 0 3px #fde68a;
-        }
-        .story-btn {
-            padding: 8px 12px;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            background-color: #fff;
-            border: 1px solid #e2e8f0;
-            color: #4a5568;
-            transition: all 0.2s;
-            cursor: pointer;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 54px;
-        }
-        .story-btn:hover {
-            background-color: #fffaf0;
-            border-color: #ed8936;
-            color: #ed8936;
-        }
-        .story-btn.active {
-            background-color: #ed8936;
-            color: white;
-            border-color: #dd6b20;
-        }
-        .grade-tab {
-            cursor: pointer;
-            padding: 12px 24px;
-            border-radius: 15px 15px 0 0;
-            transition: all 0.2s;
-            font-weight: bold;
-            color: #a0aec0;
-            background-color: #edf2f7;
-        }
-        .grade-tab.active {
-            background-color: #fff;
-            color: #ed8936;
-            box-shadow: 0 -4px 6px -1px rgb(0 0 0 / 0.05);
-        }
-        .role-tag {
-            background-color: #fef3c7;
-            color: #92400e;
-            padding: 6px 14px;
-            border-radius: 9999px;
-            font-size: 0.95rem;
-            margin: 4px;
-            display: inline-block;
-            border: 1px solid #fde68a;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>응원 문구를 추천해드립니다! 🎈</title>
+  
+  <!-- Tailwind CSS CDN 로드 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- 구글 폰트: 귀엽고 가독성 좋은 'Jua' 및 'Noto Sans KR' -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Canvas Confetti (축하 폭죽 효과용 라이브러리) -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: linear-gradient(135deg, #fef9c3 0%, #ede9fe 50%, #e0f2fe 100%);
+      min-height: 100vh;
+    }
+    .font-cute {
+      font-family: 'Jua', cursive, sans-serif;
+    }
+    /* 카드 등장 애니메이션 */
+    @keyframes popIn {
+      0% { transform: scale(0.9) translateY(20px); opacity: 0; }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    .animate-pop-in {
+      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    /* 반짝이는 효과 */
+    @keyframes gentlePulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+    }
+    .animate-gentle-pulse {
+      animation: gentlePulse 2.5s infinite ease-in-out;
+    }
+    /* 인쇄 전용 스타일 */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printArea, #printArea * {
+        visibility: visible;
+      }
+      #printArea {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+      }
+    }
+  </style>
 </head>
-<body class="min-h-screen flex flex-col items-center p-4 pb-20">
+<body class="text-slate-800 flex flex-col min-h-screen">
 
-    <!-- 헤더 영역 -->
-    <header class="w-full max-w-5xl text-center py-10">
-        <h1 class="text-5xl md:text-6xl text-orange-500 mb-3">🎭 역할극 대본 생성기</h1>
-        <p class="text-gray-500 text-xl font-light">교과서 속 따뜻한 이야기들을 연극 대본으로 만들어요!</p>
-    </header>
+  <header class="w-full bg-white/80 backdrop-blur-md shadow-sm border-b border-amber-100 sticky top-0 z-30">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2 cursor-pointer" onclick="switchTab('recommend')">
+        <span class="text-3xl">🌻</span>
+        <div>
+          <h1 class="text-xl sm:text-2xl font-cute text-amber-600 tracking-wide">응원 문구를 추천해드립니다!</h1>
+          <p class="text-xs text-slate-500 font-medium hidden sm:block">나에게 힘이 되는 따뜻한 한마디를 찾아보세요 ✨</p>
+        </div>
+      </div>
+      <!-- 탭 메뉴 버튼 -->
+      <nav class="flex gap-2">
+        <button id="navRecommendBtn" onclick="switchTab('recommend')" 
+                class="px-3.5 py-1.5 rounded-full font-cute text-sm sm:text-base transition bg-amber-500 text-white shadow-sm hover:bg-amber-600">
+          🎁 문구 추천
+        </button>
+        <button id="navSavedBtn" onclick="switchTab('saved')" 
+                class="px-3.5 py-1.5 rounded-full font-cute text-sm sm:text-base transition bg-slate-100 text-slate-600 hover:bg-amber-100">
+          ⭐ 보관함 <span id="savedCountBadge" class="ml-1 px-1.5 py-0.2 text-xs bg-amber-400 text-amber-950 rounded-full font-bold">0</span>
+        </button>
+        <button id="navCustomBtn" onclick="openModal('addCustomModal')" 
+                class="px-3 py-1.5 rounded-full font-cute text-sm sm:text-base transition bg-purple-100 text-purple-700 hover:bg-purple-200">
+          ✏️ 직접 쓰기
+        </button>
+      </nav>
+    </div>
+  </header>
 
-    <main class="w-full max-w-5xl bg-white rounded-[2.5rem] shadow-2xl p-6 md:p-10 border border-orange-50">
+  <main class="flex-grow max-w-3xl w-full mx-auto px-4 py-6 sm:py-8">
+
+    <!-- [1] 추천 탭 컨텐츠 -->
+    <section id="recommendSection" class="space-y-6">
+
+      <!-- 상황 입력 및 검색 폼 -->
+      <div class="bg-white/90 backdrop-blur-sm rounded-3xl p-5 sm:p-7 shadow-xl border-4 border-amber-200">
+        <div class="text-center mb-5">
+          <span class="inline-block px-3 py-1 bg-amber-100 text-amber-700 font-cute rounded-full text-sm mb-1">
+            🌱 오늘의 마음 날씨는 어떤가요?
+          </span>
+          <h2 class="text-xl sm:text-2xl font-cute text-slate-700">고민이나 기분을 적거나 아래 단어를 콕 눌러보세요!</h2>
+        </div>
+
+        <!-- 검색창 입력 영역 -->
+        <div class="flex flex-col sm:flex-row gap-2 max-w-xl mx-auto">
+          <div class="relative flex-grow">
+            <input type="text" id="keywordInput" placeholder="예: 시험, 친구, 실수, 발표, 떨려요..." 
+                   class="w-full px-5 py-3.5 rounded-2xl border-2 border-amber-300 focus:border-amber-500 focus:outline-none focus:ring-4 focus:ring-amber-200/50 text-base sm:text-lg transition"
+                   onkeydown="if(event.key === 'Enter') handleSearch();">
+            <button onclick="clearInput()" id="clearBtn" class="hidden absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xl font-bold">
+              ×
+            </button>
+          </div>
+          <button onclick="handleSearch()" 
+                  class="px-6 py-3.5 bg-gradient-to-r from-amber-500 to-orange-400 hover:from-amber-600 hover:to-orange-500 text-white rounded-2xl font-cute text-lg shadow-md hover:shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
+            <span>응원 받기</span> 🚀
+          </button>
+        </div>
+
+        <!-- 빠른 선택 키워드 뱃지 태그 목록 -->
+        <div class="mt-5">
+          <p class="text-xs sm:text-sm font-semibold text-slate-400 text-center mb-2.5">
+            자주 찾는 상황 키워드 🏷️
+          </p>
+          <div class="flex flex-wrap justify-center gap-2">
+            <!-- 키워드 버튼들 -->
+            <button onclick="selectKeyword('시험')" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-sm font-medium transition active:scale-95">📝 시험/공부</button>
+            <button onclick="selectKeyword('친구')" class="px-3 py-1.5 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 rounded-xl text-sm font-medium transition active:scale-95">🤝 친구/사이</button>
+            <button onclick="selectKeyword('실수')" class="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded-xl text-sm font-medium transition active:scale-95">💧 실수/속상함</button>
+            <button onclick="selectKeyword('발표')" class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-sm font-medium transition active:scale-95">🎤 발표/긴장</button>
+            <button onclick="selectKeyword('꿈')" class="px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 rounded-xl text-sm font-medium transition active:scale-95">✨ 꿈/자신감</button>
+            <button onclick="selectKeyword('운동')" class="px-3 py-1.5 bg-lime-50 hover:bg-lime-100 text-lime-700 border border-lime-200 rounded-xl text-sm font-medium transition active:scale-95">⚽ 운동/시합</button>
+            <button onclick="selectKeyword('포기')" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-sm font-medium transition active:scale-95">🧗 끈기/도전</button>
+            <button onclick="recommendRandom()" class="px-3 py-1.5 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 border border-yellow-300 rounded-xl text-sm font-cute transition active:scale-95">🎲 아무거나 추천!</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="resultContainer" class="hidden">
+        <div id="cheerCard" class="relative overflow-hidden rounded-3xl p-6 sm:p-10 shadow-2xl border-4 text-center transition duration-300">
+          
+          <!-- 카드 상단 라벨 & 이모지 -->
+          <div class="flex items-center justify-between mb-4">
+            <span id="cardBadge" class="px-3.5 py-1 rounded-full text-xs sm:text-sm font-cute tracking-wide uppercase shadow-sm">
+              🌟 특별한 응원
+            </span>
+            <div id="cardEmoji" class="text-4xl sm:text-5xl animate-gentle-pulse">💖</div>
+          </div>
+
+          <!-- 응원 문구 본문 -->
+          <div class="my-6 sm:my-8 px-2">
+            <p id="cardQuote" class="text-xl sm:text-2xl md:text-3xl font-cute leading-relaxed text-slate-800 break-keep">
+              "실수는 더 멋지게 자라기 위한 작은 디딤돌이에요!"
+            </p>
+            <p id="cardDetail" class="mt-4 text-sm sm:text-base text-slate-600 font-medium break-keep">
+              오늘의 실수를 두려워하지 마세요. 당신은 이미 한 걸음 더 앞으로 나아갔어요!
+            </p>
+          </div>
+
+          <!-- 카드 하단 버튼 모음 -->
+          <div class="pt-4 border-t border-black/10 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+            <button onclick="saveCurrentCard()" id="saveBtn"
+                    class="px-4 py-2.5 rounded-xl bg-white/90 hover:bg-white text-slate-700 font-semibold text-sm shadow hover:shadow-md transition active:scale-95 flex items-center gap-1.5">
+              <span>⭐ 보관함에 쏙</span>
+            </button>
+            <button onclick="copyCardText()" 
+                    class="px-4 py-2.5 rounded-xl bg-white/90 hover:bg-white text-slate-700 font-semibold text-sm shadow hover:shadow-md transition active:scale-95 flex items-center gap-1.5">
+              <span>📋 글 복사하기</span>
+            </button>
+            <button onclick="printCard()" 
+                    class="px-4 py-2.5 rounded-xl bg-white/90 hover:bg-white text-slate-700 font-semibold text-sm shadow hover:shadow-md transition active:scale-95 flex items-center gap-1.5">
+              <span>🖨️ 인쇄 / 저장</span>
+            </button>
+            <button onclick="recommendAnother()" 
+                    class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-cute text-sm shadow hover:shadow-md transition active:scale-95 flex items-center gap-1.5">
+              <span>🔄 다른 문구 볼래</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 첫 화면 안내용 카드 (검색 전 표시) -->
+      <div id="welcomeCard" class="bg-white/70 border-2 border-dashed border-amber-300 rounded-3xl p-8 text-center text-slate-500">
+        <div class="text-5xl mb-3">💌</div>
+        <h3 class="text-lg font-cute text-slate-700 mb-1">어떤 응원이 필요한가요?</h3>
+        <p class="text-sm">선생님과 친구들이 준비한 50가지 이상의 따뜻한 마음이 기다리고 있어요!</p>
+      </div>
+
+    </section>
+
+    <section id="savedSection" class="hidden space-y-4">
+      <div class="flex items-center justify-between bg-white/90 p-4 rounded-2xl shadow-sm border border-amber-200">
+        <div>
+          <h2 class="text-lg sm:text-xl font-cute text-slate-800">⭐ 내가 모은 응원 보관함</h2>
+          <p class="text-xs sm:text-sm text-slate-500">힘들 때마다 언제든 꺼내보세요!</p>
+        </div>
+        <button onclick="clearAllSaved()" 
+                class="px-3 py-1.5 rounded-lg text-xs sm:text-sm bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 transition font-medium">
+          전체 비우기 🗑️
+        </button>
+      </div>
+
+      <!-- 보관함 리스트 컨테이너 -->
+      <div id="savedListContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- 자바스크립트로 동적 렌더링 -->
+      </div>
+
+      <!-- 빈 보관함 표시 -->
+      <div id="emptySavedView" class="hidden bg-white/80 rounded-3xl p-10 text-center border-2 border-dashed border-slate-300">
+        <div class="text-5xl mb-2">📂</div>
+        <p class="font-cute text-lg text-slate-600">아직 보관한 응원 문구가 없어요.</p>
+        <p class="text-xs text-slate-400 mt-1">마음에 드는 문구 카드의 [보관함에 쏙] 버튼을 눌러보세요!</p>
+        <button onclick="switchTab('recommend')" class="mt-4 px-4 py-2 bg-amber-500 text-white rounded-xl font-cute text-sm hover:bg-amber-600 transition">
+          응원 문구 찾으러 가기
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="printArea" class="hidden">
+    <div class="p-8 border-4 border-amber-300 rounded-3xl max-w-xl mx-auto my-8 text-center bg-amber-50">
+      <div id="printEmoji" class="text-6xl mb-4">💖</div>
+      <h2 id="printTitle" class="text-2xl font-cute text-amber-700 mb-2">오늘의 응원 선물</h2>
+      <p id="printQuote" class="text-3xl font-cute my-6 text-slate-800 leading-normal"></p>
+      <p id="printDetail" class="text-lg text-slate-600 mb-8"></p>
+      <div class="border-t-2 border-dashed border-amber-200 pt-4 text-sm text-slate-400 font-cute">
+        우리 반 응원 우체통 📮 | 함께 자라는 우리들
+      </div>
+    </div>
+  </div>
+
+  <div id="addCustomModal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-4 border-purple-200 animate-pop-in">
+      <div class="flex justify-between items-center mb-4">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">✏️</span>
+          <h3 class="font-cute text-xl text-purple-800">새로운 응원 문구 등록하기</h3>
+        </div>
+        <button onclick="closeModal('addCustomModal')" class="text-slate-400 hover:text-slate-600 text-2xl font-bold">×</button>
+      </div>
+      
+      <p class="text-xs text-slate-500 mb-4">
+        선생님이나 내가 만든 문구를 추가할 수 있어요. 추가된 문구는 브라우저에 소중히 보관됩니다!
+      </p>
+
+      <form id="customForm" onsubmit="handleCustomSubmit(event)" class="space-y-3.5">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">관련 키워드 (쉼표로 구분)</label>
+          <input type="text" id="customKeywords" required placeholder="예: 체육대회, 줄넘기, 용기"
+                 class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-purple-400 focus:outline-none text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">대표 이모지</label>
+          <input type="text" id="customEmoji" value="🌟" maxlength="4"
+                 class="w-20 px-3 py-2 border rounded-xl text-center text-lg focus:ring-2 focus:ring-purple-400 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">응원 한마디 (큰 글씨)</label>
+          <input type="text" id="customQuote" required placeholder="예: 넌 이미 최고로 멋진 도전을 했어!"
+                 class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-purple-400 focus:outline-none text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">따뜻한 설명 (작은 글씨)</label>
+          <textarea id="customDetail" rows="2" placeholder="예: 넘어졌어도 다시 일어난 네 모습이 정말 자랑스러워."
+                    class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-purple-400 focus:outline-none text-sm"></textarea>
+        </div>
         
-        <!-- 단계 표시 인디케이터 -->
-        <div class="flex justify-around mb-10 border-b pb-6">
-            <div id="stepIndicator1" class="text-orange-500 font-bold border-b-4 border-orange-500 pb-2 flex items-center gap-2">
-                <span class="w-7 h-7 rounded-full bg-orange-500 text-white flex items-center justify-center text-sm">1</span> 이야기 선택
-            </div>
-            <div id="stepIndicator2" class="text-gray-400 flex items-center gap-2">
-                <span class="w-7 h-7 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-sm">2</span> 역할 정하기
-            </div>
-            <div id="stepIndicator3" class="text-gray-400 flex items-center gap-2">
-                <span class="w-7 h-7 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-sm">3</span> 대본 완성
-            </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeModal('addCustomModal')" 
+                  class="px-4 py-2 text-slate-500 rounded-xl hover:bg-slate-100 text-sm font-medium">
+            취소
+          </button>
+          <button type="submit" 
+                  class="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-cute text-base shadow transition">
+            등록하기 ✨
+          </button>
         </div>
+      </form>
+    </div>
+  </div>
 
-        <!-- 1단계: 이야기 선택 -->
-        <div id="step1" class="step-card active">
-            <div class="mb-8">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                    <label class="text-2xl text-orange-800 font-bold">📚 전학년 국어 교과서 도서관</label>
-                    <div class="relative w-full md:w-80">
-                        <input type="text" id="storySearch" placeholder="작품 제목을 검색해 보세요..." oninput="filterStories()"
-                            class="w-full pl-12 pr-4 py-3 border-2 border-orange-50 rounded-2xl text-md focus:border-orange-300 outline-none shadow-sm font-sans">
-                        <span class="absolute left-4 top-3 text-xl">🔍</span>
-                    </div>
-                </div>
-                
-                <!-- 학년별 탭 -->
-                <div class="flex overflow-x-auto bg-orange-50/30 rounded-t-2xl p-1 gap-1">
-                    <div onclick="changeGrade(3)" id="gradeTab3" class="grade-tab active flex-1 text-center">3학년</div>
-                    <div onclick="changeGrade(4)" id="gradeTab4" class="grade-tab flex-1 text-center">4학년</div>
-                    <div onclick="changeGrade(5)" id="gradeTab5" class="grade-tab flex-1 text-center">5학년</div>
-                    <div onclick="changeGrade(6)" id="gradeTab6" class="grade-tab flex-1 text-center">6학년</div>
-                </div>
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 transform transition-all duration-300 translate-y-20 opacity-0 pointer-events-none">
+    <div class="bg-slate-800 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 text-sm font-medium">
+      <span id="toastIcon">✨</span>
+      <span id="toastMessage">안내 메시지입니다.</span>
+    </div>
+  </div>
 
-                <!-- 이야기 버튼 그리드 -->
-                <div id="textbookStoryList" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 p-6 bg-white border-x border-b border-orange-100 rounded-b-2xl max-h-80 overflow-y-auto shadow-inner">
-                    <!-- JS로 생성됨 -->
-                </div>
-            </div>
+  <!-- 푸터 정보 -->
+  <footer class="mt-auto py-4 text-center text-xs text-slate-400 font-medium">
+    초등학교 학생들을 위한 따뜻한 응원 비타민 💊 | 언제나 너를 응원해!
+  </footer>
 
-            <label class="block text-xl mb-4 text-gray-700 font-bold">이야기 줄거리 (수정하여 우리만의 내용을 추가해도 좋아요)</label>
-            <textarea id="storyInput" rows="6" placeholder="위에서 이야기를 선택하거나 직접 내용을 입력해 주세요." 
-                class="w-full border-2 border-orange-50 bg-orange-50/10 rounded-2xl p-6 focus:ring-4 focus:ring-orange-100 focus:border-orange-300 outline-none transition-all resize-none text-lg leading-relaxed font-sans"></textarea>
-            
-            <div id="roleIdentifyLoading" class="hidden mt-6 flex items-center justify-center gap-4 text-orange-600 font-bold">
-                <div class="loader"></div>
-                <span>이야기 속 배역들을 분석하고 있어요...</span>
-            </div>
+  <script>
+    /* =========================================================================
+       [선생님을 위한 가이드] 
+       아래 defaultCheerDatabase 배열에 원하는 응원 문구를 추가하거나 수정할 수 있습니다.
+       - keywords: 학생이 입력할 만한 단어 목록
+       - quote: 카드 중앙에 크게 나올 핵심 격려 문구
+       - detail: 부드럽고 다정한 부연 설명
+       - colorTheme: 카드의 배경 및 테두리 색상 테마
+       - emoji: 대표 이모티콘
+       ========================================================================= */
+    const defaultCheerDatabase = [
+      // 1. 시험 / 공부 관련
+      {
+        id: "d1",
+        keywords: ["시험", "공부", "성적", "점수", "단원평가", "숙제", "어려워", "망쳤어"],
+        quote: "점수보다 더 반짝이는 건 오늘 너의 노력이야!",
+        detail: "시험지 한 장에 너의 모든 잠재력이 다 담기진 않아. 차근차근 꾸준히 한 네가 챔피언이야!",
+        colorTheme: "bg-amber-50 border-amber-300 text-amber-900",
+        badgeBg: "bg-amber-200 text-amber-800",
+        emoji: "📝"
+      },
+      {
+        id: "d2",
+        keywords: ["시험", "공부", "오답", "틀렸어", "어렵다"],
+        quote: "틀린 문제는 더 똑똑해질 수 있는 보물지도야!",
+        detail: "어디를 보완하면 될지 알게 되었으니 다음번엔 훨씬 더 수월해질 거야.",
+        colorTheme: "bg-orange-50 border-orange-300 text-orange-900",
+        badgeBg: "bg-orange-200 text-orange-800",
+        emoji: "🗺️️"
+      },
+      // 2. 친구 / 교우관계
+      {
+        id: "d3",
+        keywords: ["친구", "다툼", "싸움", "외로워", "혼자", "사이", "속상", "화해"],
+        quote: "너는 누구에게나 소중한 진짜 멋진 친구야.",
+        detail: "마음이 잘 맞지 않을 때도 있지만, 솔직하고 따뜻한 네 마음은 결국 상대방에게도 닿을 거야.",
+        colorTheme: "bg-sky-50 border-sky-300 text-sky-900",
+        badgeBg: "bg-sky-200 text-sky-800",
+        emoji: "🤝"
+      },
+      {
+        id: "d4",
+        keywords: ["친구", "오해", "속상해", "이야기", "대화"],
+        quote: "따뜻한 용기를 내어 '미안해' 혹은 '고마워'라고 속삭여봐!",
+        detail: "한마디의 다정한 말이 얼어붙은 친구의 마음도 사르르 녹여줄 거야.",
+        colorTheme: "bg-teal-50 border-teal-300 text-teal-900",
+        badgeBg: "bg-teal-200 text-teal-800",
+        emoji: "💌"
+      },
+      // 3. 실수 / 좌절
+      {
+        id: "d5",
+        keywords: ["실수", "망했어", "잘못", "부끄러워", "창피해", "후회"],
+        quote: "실수는 성장이라는 계단을 오르는 첫 발자국이야!",
+        detail: "넘어져 본 사람만이 일어나는 법을 배워. 너는 지금 한 뼘 더 키가 크는 중이야.",
+        colorTheme: "bg-rose-50 border-rose-300 text-rose-900",
+        badgeBg: "bg-rose-200 text-rose-800",
+        emoji: "🌱"
+      },
+      // 4. 발표 / 긴장 / 무대
+      {
+        id: "d6",
+        keywords: ["발표", "긴장", "떨려", "두근", "부끄", "앞에", "목소리"],
+        quote: "심장이 두근거리는 건 준비가 잘 되었다는 신호래!",
+        detail: "깊게 숨을 들이마시고 편안하게 말해봐. 우리 반 모두가 네 목소리에 귀 기울여줄 거야.",
+        colorTheme: "bg-emerald-50 border-emerald-300 text-emerald-900",
+        badgeBg: "bg-emerald-200 text-emerald-800",
+        emoji: "🎤"
+      },
+      // 5. 꿈 / 자존감 / 자신감
+      {
+        id: "d7",
+        keywords: ["꿈", "자신감", "미래", "희망", "소원", "되고싶어"],
+        quote: "너라는 씨앗 안에는 거대한 우주가 숨어있어!",
+        detail: "남들과 똑같지 않아도 괜찮아. 너만의 특별한 색깔로 마음껏 피어나길 응원해.",
+        colorTheme: "bg-purple-50 border-purple-300 text-purple-900",
+        badgeBg: "bg-purple-200 text-purple-800",
+        emoji: "🚀"
+      },
+      // 6. 운동 / 체육 / 경기
+      {
+        id: "d8",
+        keywords: ["운동", "체육", "축구", "피구", "달리기", "줄넘기", "경기", "패배"],
+        quote: "끝까지 달린 네 땀방울이 오늘의 진짜 금메달!",
+        detail: "이기는 것보다 끝까지 포기하지 않고 뛴 네 모습이 천 배는 더 멋져.",
+        colorTheme: "bg-lime-50 border-lime-300 text-lime-900",
+        badgeBg: "bg-lime-200 text-lime-800",
+        emoji: "🏅"
+      },
+      // 7. 포기 / 힘듦 / 지침
+      {
+        id: "d9",
+        keywords: ["포기", "힘들어", "지쳐", "쉬고싶어", "그만", "어려움"],
+        quote: "잠깐 쉬어가도 괜찮아. 느려도 멈추지 않으면 돼.",
+        detail: "기차도 다음 역을 향해 달리기 전엔 에너지를 충전한단다. 물 한 잔 마시고 심호흡 셋!",
+        colorTheme: "bg-indigo-50 border-indigo-300 text-indigo-900",
+        badgeBg: "bg-indigo-200 text-indigo-800",
+        emoji: "🛋️"
+      },
+      // 8. 일상 격려 및 만능 응원 문구
+      {
+        id: "d10",
+        keywords: ["오늘", "심심해", "그냥", "아무거나", "사랑", "행복"],
+        quote: "오늘 하루, 너라는 존재만으로도 우리 교실은 충분히 밝아!",
+        detail: "오늘도 씩씩하게 학교에 온 네가 참 대견하고 자랑스러워.",
+        colorTheme: "bg-yellow-50 border-yellow-300 text-yellow-900",
+        badgeBg: "bg-yellow-200 text-yellow-800",
+        emoji: "☀️"
+      }
+    ];
 
-            <div class="mt-10 flex justify-center">
-                <button onclick="handleIdentifyRoles()" class="bg-orange-500 hover:bg-orange-600 text-white text-2xl px-16 py-5 rounded-3xl shadow-2xl transition-all transform hover:scale-105 font-bold">
-                    배역 분석 시작하기 ➡️
-                </button>
-            </div>
-        </div>
+    // 로컬스토리지 키 정의
+    const STORAGE_KEY_SAVED = 'cheer_saved_cards_v1';
+    const STORAGE_KEY_CUSTOM = 'cheer_custom_quotes_v1';
 
-        <!-- 2단계: 학생 이름 및 배역 할당 -->
-        <div id="step2" class="step-card">
-            <div class="mb-10">
-                <h3 class="text-xl text-gray-800 font-bold mb-4 flex items-center gap-2">
-                    📋 추천 배역 리스트
-                </h3>
-                <div id="detectedRolesContainer" class="flex flex-wrap gap-2 p-5 bg-orange-50 rounded-2xl border-2 border-dashed border-orange-200 min-h-[70px]">
-                </div>
-            </div>
+    let currentCardData = null;
+    let lastMatchedList = [];
+    let currentMatchIndex = 0;
 
-            <div class="bg-amber-50 p-8 rounded-[40px] mb-10 border border-amber-100">
-                <div class="flex flex-col md:flex-row items-center gap-6 mb-8">
-                    <span class="text-xl font-bold text-amber-800">👥 연극할 학생 수:</span>
-                    <div class="flex items-center gap-3">
-                        <input type="number" id="studentCount" min="1" max="15" value="4" onchange="renderAssignmentInputs()"
-                            class="w-24 border-2 border-amber-200 rounded-2xl px-4 py-3 text-center text-xl outline-none focus:border-amber-500 bg-white font-bold">
-                        <span class="text-amber-600 font-bold">명</span>
-                    </div>
-                </div>
-                
-                <div id="assignmentInputsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                </div>
-            </div>
+    // 로컬 데이터 로더
+    function getSavedCards() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_SAVED);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        console.error("보관함 데이터 로드 에러:", e);
+        return [];
+      }
+    }
 
-            <div class="flex justify-between items-center mt-10">
-                <button onclick="goToStep(1)" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xl px-10 py-4 rounded-2xl transition-all">
-                    ⬅️ 뒤로가기
-                </button>
-                <button onclick="generateScript()" class="bg-orange-500 hover:bg-orange-600 text-white text-2xl px-16 py-5 rounded-3xl shadow-2xl transition-all transform hover:scale-105 font-bold">
-                    🚀 대본 완성하기!
-                </button>
-            </div>
-        </div>
+    function saveSavedCards(cards) {
+      try {
+        localStorage.setItem(STORAGE_KEY_SAVED, JSON.stringify(cards));
+        updateSavedBadge();
+      } catch (e) {
+        console.error("보관함 저장 에러:", e);
+      }
+    }
 
-        <!-- 3단계: 대본 결과 및 편집 -->
-        <div id="step3" class="step-card">
-            <div id="loadingArea" class="hidden flex flex-col items-center justify-center py-24">
-                <div class="loader mb-10 w-20 h-20 border-[10px] border-t-orange-500"></div>
-                <p class="text-3xl text-orange-600 animate-pulse text-center font-bold">우리들만의 따뜻한 이야기를<br>대본으로 작성하고 있어요!</p>
-            </div>
+    function getCustomQuotes() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_CUSTOM);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
+    }
 
-            <div id="resultArea" class="hidden">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-                    <div>
-                        <h3 class="text-3xl text-orange-700 font-bold mb-1">🎭 완성된 역할극 대본</h3>
-                        <p class="text-md text-slate-500 flex items-center gap-2 font-sans font-medium">
-                            <span>✍️</span> 대본 내용을 클릭해서 자유롭게 고치거나 대사를 추가해 보세요!
-                        </p>
-                    </div>
-                    <div class="flex gap-3">
-                        <button onclick="copyToClipboard()" class="bg-orange-100 text-orange-700 px-6 py-2 rounded-2xl hover:bg-orange-200 transition-colors font-bold font-sans">복사하기</button>
-                    </div>
-                </div>
-                
-                <div id="scriptOutput" contenteditable="true" class="shadow-xl transition-all border border-orange-100 overflow-y-auto max-h-[800px]">
-                    <!-- 대본 내용 -->
-                </div>
+    function saveCustomQuote(quoteObj) {
+      const list = getCustomQuotes();
+      list.push(quoteObj);
+      localStorage.setItem(STORAGE_KEY_CUSTOM, JSON.stringify(list));
+    }
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-12">
-                    <button onclick="printScript()" class="bg-orange-500 hover:bg-orange-600 text-white py-6 rounded-3xl text-2xl shadow-xl font-bold transition-all transform hover:-translate-y-1">
-                        🖨️ 대본 인쇄 / 저장하기
-                    </button>
-                    <button onclick="goToStep(1)" class="bg-slate-100 hover:bg-slate-200 text-slate-500 px-10 py-6 rounded-3xl text-xl font-medium transition-all">
-                        🔄 처음으로 돌아가기
-                    </button>
-                </div>
-            </div>
-        </div>
+    function getAllQuotes() {
+      return [...defaultCheerDatabase, ...getCustomQuotes()];
+    }
 
-    </main>
+    // 뱃지 숫자 갱신
+    function updateSavedBadge() {
+      const list = getSavedCards();
+      const badge = document.getElementById('savedCountBadge');
+      if (badge) badge.textContent = list.length;
+    }
 
-    <footer class="mt-16 text-slate-400 text-sm pb-10 text-center font-sans">
-        © 2024 역할극 대본 생성기 | 전학년 국어 교과서 문학 통합 라이브러리 탑재
-    </footer>
+    function handleSearch() {
+      const input = document.getElementById('keywordInput');
+      const query = input.value.trim().toLowerCase();
 
-    <script>
-        // --- 전학년 국어 교과서 문학 데이터베이스 (방대한 목록) ---
-        const textbookStories = [
-            // 3학년
-            { grade: 3, title: "토끼와 자라", content: "용왕님의 병을 위해 자라가 토끼의 간을 구하러 육지로 가지만, 지혜로운 토끼가 간을 육지에 두고 왔다고 속여 탈출하는 이야기입니다." },
-            { grade: 3, title: "젊어지는 샘물", content: "샘물을 마시고 젊어진 할아버지와 아기가 된 욕심쟁이 영감님의 이야기입니다." },
-            { grade: 3, title: "아기 돼지 삼형제", content: "늑대의 위협에서 벽돌집을 지은 막내 돼지가 형들을 구하고 집을 지켜내는 이야기입니다." },
-            { grade: 3, title: "거인 이야기", content: "정원의 문을 닫았던 거인이 아이들의 웃음소리와 함께 정원에 봄이 오는 것을 보고 마음을 여는 이야기입니다." },
-            { grade: 3, title: "황금 도끼 은 도끼", content: "정직한 나무꾼이 산신령에게 금도끼를 받고, 욕심쟁이는 자기 도끼마저 잃게 되는 이야기입니다." },
-            { grade: 3, title: "꽃샘추위", content: "추운 겨울이 지나고 봄이 오는 것을 시샘하는 겨울바람과, 이를 이겨내고 꽃을 피우려는 봄꽃들의 이야기입니다." },
-            { grade: 3, title: "해와 달이 된 오누이", content: "호랑이를 피해 하늘로 올라간 오누이가 해와 달이 되었다는 우리나라 전래 설화입니다." },
-            { grade: 3, title: "단군 신화", content: "곰과 호랑이가 사람이 되기 위해 동굴에서 견디고, 결국 웅녀가 되어 단군을 낳은 건국 이야기입니다." },
-            { grade: 3, title: "의좋은 형제", content: "밤마다 서로의 논에 볏단을 옮겨주던 형제의 따뜻한 우애를 다룬 이야기입니다." },
-            { grade: 3, title: "떡보의 하루", content: "떡을 너무 좋아하는 떡보가 겪는 재미있고 훈훈한 일상 이야기입니다." },
+      if (!query) {
+        showToast('고민이나 상황 단어를 한 글자 이상 적어주세요! ✏️');
+        input.focus();
+        return;
+      }
 
-            // 4학년
-            { grade: 4, title: "만복이네 떡집", content: "심술궂은 만복이가 신비로운 떡을 먹으며 남을 배려하는 법을 배우는 판타지 동화입니다." },
-            { grade: 4, title: "바삭바삭 갈매기", content: "과자 맛에 빠져 야성을 잃었던 갈매기가 다시 자유로운 바다로 돌아가는 과정을 그린 이야기입니다." },
-            { grade: 4, title: "흥부와 놀부", content: "제비 다리를 고쳐준 흥부와 일부러 부러뜨린 놀부의 대조적인 결말을 보여주는 권선징악 이야기입니다." },
-            { grade: 4, title: "콩쥐 팥쥐", content: "계모의 구박을 이겨내고 동물들의 도움으로 행복을 찾는 우리나라판 신데렐라 이야기입니다." },
-            { grade: 4, title: "사라진 보물", content: "교실에서 보물을 찾기 위해 친구들이 탐정이 되어 단서를 추리하는 이야기입니다." },
-            { grade: 4, title: "가방 들어주는 아이", content: "장애를 가진 친구의 가방을 들어주며 진정한 우정을 쌓아가는 감동적인 이야기입니다." },
-            { grade: 4, title: "넉 점 반", content: "심부름을 간 아이가 구경에 빠져 시간을 잊어버리는 천진난만한 일상을 다룬 이야기입니다." },
-            { grade: 4, title: "아낌없이 주는 나무", content: "소년을 위해 자신의 모든 것을 내어주는 나무의 조건 없는 사랑 이야기입니다." },
-            { grade: 4, title: "엄마의 마흔 번째 생일", content: "엄마의 생일을 준비하며 가족의 소중함을 깨닫는 아이들의 이야기입니다." },
-            { grade: 4, title: "금수 회의록 (요약)", content: "동물들이 모여 인간들의 잘못을 비판하는 우화적인 이야기입니다." },
+      findAndDisplayMatches(query);
+    }
 
-            // 5학년
-            { grade: 5, title: "소가 된 게으름장이", content: "일을 하기 싫어하던 게으름장이가 소 머리탈을 썼다가 진짜 소가 되어 고생한 뒤 깨달음을 얻는 이야기입니다." },
-            { grade: 5, title: "임금님 귀는 당나귀 귀", content: "임금님의 비밀을 대나무 숲에서 외친 복두장이와 진실이 밝혀지는 통쾌한 설화입니다." },
-            { grade: 5, title: "홍길동전", content: "서자로 태어난 홍길동이 도술을 익혀 빈민을 돕는 의적이 되는 영웅 소설입니다." },
-            { grade: 5, title: "심청전", content: "눈먼 아버지를 위해 인당수에 몸을 던진 심청이의 효심과 행복한 결말을 다룬 고전입니다." },
-            { grade: 5, title: "자전거 도둑", content: "도시에서 살아가는 소년이 도덕적 갈등을 겪으며 정직의 가치를 깨닫는 소설입니다." },
-            { grade: 5, title: "춘향전", content: "성춘향과 이몽룡의 신분을 초월한 사랑과 변학도의 횡포를 이겨내는 이야기입니다." },
-            { grade: 5, title: "양반전", content: "무능한 양반의 허례허식을 풍자하고 신분을 사고파는 사회상을 다룬 소설입니다." },
-            { grade: 5, title: "박씨전", content: "외모로 차별받던 박씨 부인이 도술로 적군을 물리치는 여성 영웅의 활약상입니다." },
-            { grade: 5, title: "장화홍련전", content: "억울하게 죽은 자매의 원한을 풀고 계모의 악행이 밝혀지는 고전 소설입니다." },
-            { grade: 5, title: "방구 아저씨", content: "투박하지만 따뜻한 마음을 가진 아저씨와 아이들의 교감을 다룬 동화입니다." },
+    function selectKeyword(kw) {
+      const input = document.getElementById('keywordInput');
+      input.value = kw;
+      updateClearBtn();
+      findAndDisplayMatches(kw.toLowerCase());
+    }
 
-            // 6학년
-            { grade: 6, title: "하늘은 맑건만", content: "주운 돈을 써버린 문기가 죄책감을 느끼다 정직하게 고백하고 마음의 평화를 얻는 이야기입니다." },
-            { grade: 6, title: "수난이대", content: "전쟁으로 다리를 잃은 아버지와 팔을 잃은 아들이 서로를 부축하며 외나무다리를 건너는 이야기입니다." },
-            { grade: 6, title: "마당을 나온 암탉", content: "양계장을 나와 자유를 찾고 아기 오리를 정성껏 키우는 암탉 잎싹의 감동적인 여정입니다." },
-            { grade: 6, title: "이상한 나라의 앨리스", content: "회중시계를 든 토끼를 따라 구멍에 빠진 앨리스가 겪는 신비로운 모험 이야기입니다." },
-            { grade: 6, title: "어린 왕자", content: "여우와 장미를 통해 길들임과 책임, 진정한 관계의 의미를 배우는 철학적인 동화입니다." },
-            { grade: 6, title: "꽃신", content: "전통을 고수하는 꽃신 제작자의 고집과 애환을 다룬 소설입니다." },
-            { grade: 6, title: "옹고집전", content: "욕심 많은 진짜 옹고집이 가짜 옹고집에게 쫓겨나 고생하며 개과천선하는 풍자 소설입니다." },
-            { grade: 6, title: "연오랑과 세오녀", content: "신라의 부부가 일본으로 건너가 해와 달의 정기를 되찾아준 설화입니다." },
-            { grade: 6, title: "빨간 머리 앤", content: "상상력이 풍부한 고아 소녀 앤이 에이번리 마을에서 성장하며 겪는 유쾌한 이야기입니다." },
-            { grade: 6, title: "허준 (동의보감)", content: "백성을 사랑하는 마음으로 평생을 의학 연구에 바친 허준의 일생을 다룬 이야기입니다." }
-        ];
+    function recommendRandom() {
+      const all = getAllQuotes();
+      const randomIdx = Math.floor(Math.random() * all.length);
+      lastMatchedList = [all[randomIdx]];
+      currentMatchIndex = 0;
+      displayCard(lastMatchedList[0], "🎲 무작위 응원 선물");
+      triggerConfetti();
+    }
 
-        const apiKey = ""; 
-        let currentGrade = 3;
-        let userData = {
-            story: "",
-            detectedRoles: [],
-            assignments: []
+    function findAndDisplayMatches(query) {
+      const all = getAllQuotes();
+      
+      // 검색어가 키워드에 포함되거나 내용에 포함되는 카드 필터링
+      let matches = all.filter(item => {
+        const hasKeyword = item.keywords.some(k => k.toLowerCase().includes(query) || query.includes(k.toLowerCase()));
+        const hasText = item.quote.toLowerCase().includes(query) || item.detail.toLowerCase().includes(query);
+        return hasKeyword || hasText;
+      });
+
+      // 만약 일치하는 키워드가 없다면 만능 격려 문구 반환
+      let isFallback = false;
+      if (matches.length === 0) {
+        matches = all; // 전체 중 추천
+        isFallback = true;
+      }
+
+      // 무작위 셔플
+      matches.sort(() => Math.random() - 0.5);
+
+      lastMatchedList = matches;
+      currentMatchIndex = 0;
+
+      const badgeLabel = isFallback ? "🌟 반짝이는 만능 응원" : `🎯 '${query}' 맞춤 응원`;
+      displayCard(lastMatchedList[0], badgeLabel);
+      triggerConfetti();
+
+      if (isFallback) {
+        showToast(`'${query}'에 꼭 맞는 카드가 없어 따뜻한 만능 응원을 전해드려요! 💖`);
+      }
+    }
+
+    function recommendAnother() {
+      if (!lastMatchedList || lastMatchedList.length === 0) {
+        recommendRandom();
+        return;
+      }
+      currentMatchIndex = (currentMatchIndex + 1) % lastMatchedList.length;
+      displayCard(lastMatchedList[currentMatchIndex]);
+    }
+
+    function displayCard(item, badgeText) {
+      currentCardData = item;
+
+      const welcomeCard = document.getElementById('welcomeCard');
+      const resultContainer = document.getElementById('resultContainer');
+      const cheerCard = document.getElementById('cheerCard');
+
+      if (welcomeCard) welcomeCard.classList.add('hidden');
+      resultContainer.classList.remove('hidden');
+
+      // 기존 테마 클래스 제거 후 새 테마 클래스 부여
+      cheerCard.className = `relative overflow-hidden rounded-3xl p-6 sm:p-10 shadow-2xl border-4 text-center transition duration-300 animate-pop-in ${item.colorTheme || 'bg-amber-50 border-amber-300 text-amber-900'}`;
+
+      const badge = document.getElementById('cardBadge');
+      if (badgeText) badge.textContent = badgeText;
+      badge.className = `px-3.5 py-1 rounded-full text-xs sm:text-sm font-cute tracking-wide uppercase shadow-sm ${item.badgeBg || 'bg-amber-200 text-amber-800'}`;
+
+      document.getElementById('cardEmoji').textContent = item.emoji || '✨';
+      document.getElementById('cardQuote').textContent = `"${item.quote}"`;
+      document.getElementById('cardDetail').textContent = item.detail || '';
+
+      // 보관 여부에 따라 저장 버튼 상태 동기화
+      checkIsSavedAndUpdateBtn();
+
+      // 모바일 화면 배려: 결과창이 보이도록 부드럽게 스크롤
+      resultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function checkIsSavedAndUpdateBtn() {
+      if (!currentCardData) return;
+      const saved = getSavedCards();
+      const isAlready = saved.some(s => s.quote === currentCardData.quote);
+      const btn = document.getElementById('saveBtn');
+      if (btn) {
+        if (isAlready) {
+          btn.innerHTML = '<span>💛 보관됨</span>';
+          btn.classList.add('text-amber-600');
+        } else {
+          btn.innerHTML = '<span>⭐ 보관함에 쏙</span>';
+          btn.classList.remove('text-amber-600');
+        }
+      }
+    }
+
+    function saveCurrentCard() {
+      if (!currentCardData) return;
+      const list = getSavedCards();
+      const exists = list.some(item => item.quote === currentCardData.quote);
+
+      if (exists) {
+        // 이미 저장되어 있으면 보관함에서 제거(토글)
+        const filtered = list.filter(item => item.quote !== currentCardData.quote);
+        saveSavedCards(filtered);
+        showToast('보관함에서 꺼냈어요! 💨');
+      } else {
+        const itemToSave = {
+          ...currentCardData,
+          savedAt: new Date().toLocaleDateString('ko-KR')
         };
+        list.unshift(itemToSave);
+        saveSavedCards(list);
+        showToast('나만의 응원 보관함에 쏙 넣었어요! ⭐');
+        triggerConfetti(0.3);
+      }
+      checkIsSavedAndUpdateBtn();
+      if (!document.getElementById('savedSection').classList.contains('hidden')) {
+        renderSavedList();
+      }
+    }
 
-        window.onload = () => {
-            renderStoryList(3);
-        };
+    function deleteSavedCard(quoteToDelete) {
+      const list = getSavedCards().filter(item => item.quote !== quoteToDelete);
+      saveSavedCards(list);
+      renderSavedList();
+      checkIsSavedAndUpdateBtn();
+      showToast('문구를 보관함에서 삭제했습니다.');
+    }
 
-        function changeGrade(grade) {
-            currentGrade = grade;
-            document.querySelectorAll('.grade-tab').forEach(tab => tab.classList.remove('active'));
-            document.getElementById(`gradeTab${grade}`).classList.add('active');
-            renderStoryList(grade);
-        }
+    function clearAllSaved() {
+      const list = getSavedCards();
+      if (list.length === 0) {
+        showToast('비울 보관함이 비어있어요!');
+        return;
+      }
+      // alert() 대신 안전하게 확인 UI 동작
+      saveSavedCards([]);
+      renderSavedList();
+      checkIsSavedAndUpdateBtn();
+      showToast('보관함을 깨끗하게 비웠어요! 🧹');
+    }
 
-        function filterStories() {
-            const term = document.getElementById('storySearch').value.toLowerCase();
-            renderStoryList(currentGrade, term);
-        }
+    function renderSavedList() {
+      const list = getSavedCards();
+      const container = document.getElementById('savedListContainer');
+      const emptyView = document.getElementById('emptySavedView');
 
-        function renderStoryList(grade, filter = '') {
-            const listContainer = document.getElementById('textbookStoryList');
-            listContainer.innerHTML = '';
-            const filteredStories = filter 
-                ? textbookStories.filter(s => s.title.toLowerCase().includes(filter))
-                : textbookStories.filter(s => s.grade === grade);
-            
-            filteredStories.forEach(story => {
-                const btn = document.createElement('button');
-                btn.className = 'story-btn shadow-sm font-medium';
-                btn.innerText = story.title;
-                btn.onclick = () => {
-                    document.getElementById('storyInput').value = story.content;
-                    document.querySelectorAll('.story-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                };
-                listContainer.appendChild(btn);
-            });
-        }
+      container.innerHTML = '';
+      if (list.length === 0) {
+        emptyView.classList.remove('hidden');
+        return;
+      }
+      emptyView.classList.add('hidden');
 
-        function goToStep(stepNum) {
-            document.querySelectorAll('.step-card').forEach(card => card.classList.remove('active'));
-            document.getElementById(`step${stepNum}`).classList.add('active');
-            for (let i = 1; i <= 3; i++) {
-                const indicator = document.getElementById(`stepIndicator${i}`);
-                if (i === stepNum) {
-                    indicator.className = "text-orange-500 font-bold border-b-4 border-orange-500 pb-2 flex items-center gap-2";
-                    indicator.querySelector('span').className = "w-7 h-7 rounded-full bg-orange-500 text-white flex items-center justify-center text-sm";
-                } else if (i < stepNum) {
-                    indicator.className = "text-green-500 font-bold flex items-center gap-2";
-                    indicator.querySelector('span').className = "w-7 h-7 rounded-full bg-green-500 text-white flex items-center justify-center text-sm";
-                } else {
-                    indicator.className = "text-gray-400 flex items-center gap-2";
-                    indicator.querySelector('span').className = "w-7 h-7 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-sm";
-                }
-            }
-            window.scrollTo(0, 0);
-        }
+      list.forEach((item) => {
+        const cardEl = document.createElement('div');
+        cardEl.className = `p-5 rounded-2xl border-2 shadow-sm relative flex flex-col justify-between ${item.colorTheme || 'bg-amber-50 border-amber-200'}`;
+        cardEl.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-2xl">${item.emoji || '✨'}</span>
+              <button onclick="deleteSavedCard('${item.quote.replace(/'/g, "\\'")}')" 
+                      title="삭제" class="text-slate-400 hover:text-rose-500 font-bold p-1 text-sm">
+                ✕
+              </button>
+            </div>
+            <p class="font-cute text-lg text-slate-800 mb-1 leading-snug">"${item.quote}"</p>
+            <p class="text-xs text-slate-600 mb-3">${item.detail || ''}</p>
+          </div>
+          <div class="pt-2 border-t border-black/5 flex items-center justify-between text-[11px] text-slate-400 font-medium">
+            <span>보관일: ${item.savedAt || '오늘'}</span>
+            <button onclick="copySingleQuote('${item.quote.replace(/'/g, "\\'")}')" class="text-amber-700 hover:underline">
+              복사하기 📋
+            </button>
+          </div>
+        `;
+        container.appendChild(cardEl);
+      });
+    }
 
-        async function handleIdentifyRoles() {
-            const story = document.getElementById('storyInput').value.trim();
-            if (!story) return alert("이야기를 먼저 선택하거나 입력해 주세요!");
-            document.getElementById('roleIdentifyLoading').classList.remove('hidden');
-            try {
-                const response = await fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: `이야기에서 역할극 배역 4~8명 추출 (JSON ["배역1", "배역2"] 형식): ${story}` }] }],
-                        generationConfig: { responseMimeType: "application/json", responseSchema: { type: "OBJECT", properties: { roles: { type: "ARRAY", items: { type: "STRING" } } } } }
-                    })
-                });
-                const result = await response.json();
-                userData.detectedRoles = JSON.parse(result.candidates[0].content.parts[0].text).roles || ["해설", "주인공"];
-                renderDetectedRoles();
-                renderAssignmentInputs();
-                goToStep(2);
-            } catch (e) {
-                userData.detectedRoles = ["해설", "주인공", "친구1", "친구2"];
-                renderDetectedRoles();
-                renderAssignmentInputs();
-                goToStep(2);
-            } finally {
-                document.getElementById('roleIdentifyLoading').classList.add('hidden');
-            }
-        }
+    function copyCardText() {
+      if (!currentCardData) return;
+      const textToCopy = `"${currentCardData.quote}"\n- ${currentCardData.detail}\n[응원 문구를 추천해드립니다! 🎈]`;
+      fallbackCopyText(textToCopy);
+      showToast('응원 문구가 클립보드에 복사되었어요! 📋');
+    }
 
-        function renderDetectedRoles() {
-            document.getElementById('detectedRolesContainer').innerHTML = userData.detectedRoles.map(role => `<span class="role-tag">👤 ${role}</span>`).join('');
-        }
+    function copySingleQuote(text) {
+      fallbackCopyText(text);
+      showToast('문구가 복사되었습니다! 📋');
+    }
 
-        function renderAssignmentInputs() {
-            const container = document.getElementById('assignmentInputsContainer');
-            const count = parseInt(document.getElementById('studentCount').value) || 4;
-            container.innerHTML = '';
-            for (let i = 0; i < count; i++) {
-                container.innerHTML += `
-                    <div class="flex flex-col gap-1 bg-white p-4 rounded-3xl shadow-sm border border-orange-100">
-                        <label class="text-[10px] text-orange-400 font-bold ml-2">참가자 ${i+1}</label>
-                        <div class="flex gap-2">
-                            <input type="text" placeholder="학생 이름" class="student-name-input flex-1 border border-slate-100 rounded-xl px-3 py-2 text-sm outline-none focus:border-orange-300 font-sans">
-                            <input type="text" list="roleOptions" placeholder="역할" class="student-role-input flex-1 border border-slate-100 rounded-xl px-3 py-2 text-sm outline-none focus:border-orange-300 font-sans"
-                                value="${userData.detectedRoles[i % userData.detectedRoles.length] || ''}">
-                        </div>
-                    </div>
-                `;
-            }
-            let datalist = document.getElementById('roleOptions') || document.createElement('datalist');
-            datalist.id = 'roleOptions';
-            document.body.appendChild(datalist);
-            datalist.innerHTML = userData.detectedRoles.map(r => `<option value="${r}">`).join('');
-        }
+    // iframe 보안 환경 호환용 클립보드 복사
+    function fallbackCopyText(text) {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-999999px";
+      textArea.style.top = "-999999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
+      } catch (err) {
+        console.error('복사 실패:', err);
+      }
+      document.body.removeChild(textArea);
+    }
 
-        async function generateScript() {
-            const story = document.getElementById('storyInput').value;
-            const namesAndRoles = Array.from(document.querySelectorAll('.student-name-input')).map((n, i) => {
-                return { name: n.value || '학생'+(i+1), role: document.querySelectorAll('.student-role-input')[i].value || '역할' };
-            });
-            
-            goToStep(3);
-            document.getElementById('loadingArea').classList.remove('hidden');
-            document.getElementById('resultArea').classList.add('hidden');
+    function printCard() {
+      if (!currentCardData) return;
+      document.getElementById('printEmoji').textContent = currentCardData.emoji || '💌';
+      document.getElementById('printQuote').textContent = `"${currentCardData.quote}"`;
+      document.getElementById('printDetail').textContent = currentCardData.detail || '';
+      
+      const printArea = document.getElementById('printArea');
+      printArea.classList.remove('hidden');
+      window.print();
+      printArea.classList.add('hidden');
+    }
 
-            const mapping = namesAndRoles.map(a => `${a.name}(배역: ${a.role})`).join(', ');
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+    }
 
-            const systemPrompt = `당신은 초등학교 국어 교사입니다. 가독성이 아주 좋고 따뜻한 느낌의 연극 대본을 작성하세요.
-제공된 학생 명단과 배역을 정확히 사용하세요: ${mapping}
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
 
-[구성 지시]
-1. 대본 시작 전 [오늘의 출연진] 섹션을 만드세요.
-   형식: 🎭 오늘의 출연진\n- [배역 이름] : [학생 이름] 학생\n... (모든 학생 나열)
-2. 대본 본문의 대사 형식: [배역 이름] ([학생 이름]): "대사"
-3. 모든 학생의 대사 분량을 골고루 나누어 3~5분 분량으로 작성하세요.
-4. 초등학생 수준에 맞춰 따뜻하고 유쾌한 내용을 담으세요.
-5. 대본 형식: [제목], [장소], [해설], [배역]([이름]): 대사, (지문)`;
+    function handleCustomSubmit(e) {
+      e.preventDefault();
+      const kwInput = document.getElementById('customKeywords').value;
+      const emojiInput = document.getElementById('customEmoji').value.trim() || '🌟';
+      const quoteInput = document.getElementById('customQuote').value.trim();
+      const detailInput = document.getElementById('customDetail').value.trim();
 
-            try {
-                const response = await fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: `이야기 줄거리: ${story}` }] }],
-                        systemInstruction: { parts: [{ text: systemPrompt }] }
-                    })
-                });
-                const data = await response.json();
-                document.getElementById('scriptOutput').innerText = data.candidates[0].content.parts[0].text;
-                document.getElementById('loadingArea').classList.add('hidden');
-                document.getElementById('resultArea').classList.remove('hidden');
-            } catch (e) {
-                document.getElementById('loadingArea').classList.add('hidden');
-                alert("대본 생성에 실패했습니다.");
-                goToStep(2);
-            }
-        }
+      const keywords = kwInput.split(',').map(s => s.trim()).filter(Boolean);
 
-        async function fetchWithRetry(url, options, retries = 5, backoff = 1000) {
-            try {
-                const res = await fetch(url, options);
-                if (!res.ok) throw new Error();
-                return res;
-            } catch (e) {
-                if (retries > 0) {
-                    await new Promise(r => setTimeout(r, backoff));
-                    return fetchWithRetry(url, options, retries - 1, backoff * 2);
-                }
-                throw e;
-            }
-        }
+      const newQuote = {
+        id: 'c_' + Date.now(),
+        keywords: keywords.length ? keywords : ['특별한'],
+        quote: quoteInput,
+        detail: detailInput,
+        colorTheme: 'bg-purple-50 border-purple-300 text-purple-950',
+        badgeBg: 'bg-purple-200 text-purple-800',
+        emoji: emojiInput
+      };
 
-        function copyToClipboard() {
-            const text = document.getElementById('scriptOutput').innerText;
-            const el = document.createElement('textarea');
-            el.value = text;
-            document.body.appendChild(el);
-            el.select();
-            document.execCommand('copy');
-            document.body.removeChild(el);
-            alert("대본이 복사되었습니다!");
-        }
+      saveCustomQuote(newQuote);
+      closeModal('addCustomModal');
+      document.getElementById('customForm').reset();
+      
+      // 방금 등록한 문구 바로 띄워주기
+      displayCard(newQuote, '✨ 내가 직접 만든 문구');
+      triggerConfetti();
+      showToast('새로운 응원 문구가 등록되었습니다! 🎉');
+    }
 
-        function printScript() {
-            const content = document.getElementById('scriptOutput').innerText;
-            const win = window.open('', '', 'height=800,width=1000');
-            win.document.write(`
-                <html>
-                    <head>
-                        <title>우리들의 따뜻한 대본 출력</title>
-                        <style>
-                            @import url('https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap');
-                            body { 
-                                padding: 60px; 
-                                line-height: 1.8; 
-                                white-space: pre-wrap; 
-                                font-family: 'Nanum Pen Script', cursive; 
-                                font-size: 22pt;
-                                color: #333;
-                            }
-                            h1 { text-align: center; border-bottom: 2px solid #ed8936; padding-bottom: 20px; color: #ed8936; }
-                        </style>
-                    </head>
-                    <body>
-                        <h1>🎬 우리들이 만드는 역할극 대본</h1>
-                        ${content}
-                    </body>
-                </html>
-            `);
-            win.document.close();
-            win.print();
-        }
-    </script>
+    function triggerConfetti(scale = 1.0) {
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: Math.floor(40 * scale),
+          spread: 60,
+          origin: { y: 0.7 },
+          colors: ['#f59e0b', '#ec4899', '#3b82f6', '#10b981', '#a855f7']
+        });
+      }
+    }
+
+    let toastTimer = null;
+    function showToast(msg, icon = '💌') {
+      const toast = document.getElementById('toast');
+      const msgEl = document.getElementById('toastMessage');
+      const iconEl = document.getElementById('toastIcon');
+
+      msgEl.textContent = msg;
+      iconEl.textContent = icon;
+
+      toast.classList.remove('opacity-0', 'translate-y-20', 'pointer-events-none');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'translate-y-20', 'pointer-events-none');
+      }, 2600);
+    }
+
+    function switchTab(tab) {
+      const recSec = document.getElementById('recommendSection');
+      const savedSec = document.getElementById('savedSection');
+      const recBtn = document.getElementById('navRecommendBtn');
+      const savedBtn = document.getElementById('navSavedBtn');
+
+      if (tab === 'recommend') {
+        recSec.classList.remove('hidden');
+        savedSec.classList.add('hidden');
+        recBtn.className = "px-3.5 py-1.5 rounded-full font-cute text-sm sm:text-base transition bg-amber-500 text-white shadow-sm hover:bg-amber-600";
+        savedBtn.className = "px-3.5 py-1.5 rounded-full font-cute text-sm sm:text-base transition bg-slate-100 text-slate-600 hover:bg-amber-100";
+      } else {
+        recSec.classList.add('hidden');
+        savedSec.classList.remove('hidden');
+        recBtn.className = "px-3.5 py-1.5 rounded-full font-cute text-sm sm:text-base transition bg-slate-100 text-slate-600 hover:bg-amber-100";
+        savedBtn.className = "px-3.5 py-1.5 rounded-full font-cute text-sm sm:text-base transition bg-amber-500 text-white shadow-sm hover:bg-amber-600";
+        renderSavedList();
+      }
+    }
+
+    function clearInput() {
+      const input = document.getElementById('keywordInput');
+      input.value = '';
+      updateClearBtn();
+      input.focus();
+    }
+
+    function updateClearBtn() {
+      const input = document.getElementById('keywordInput');
+      const btn = document.getElementById('clearBtn');
+      if (input.value.length > 0) {
+        btn.classList.remove('hidden');
+      } else {
+        btn.classList.add('hidden');
+      }
+    }
+
+    // 초기 실행
+    window.addEventListener('DOMContentLoaded', () => {
+      updateSavedBadge();
+      const input = document.getElementById('keywordInput');
+      input.addEventListener('input', updateClearBtn);
+    });
+  </script>
 </body>
 </html>
